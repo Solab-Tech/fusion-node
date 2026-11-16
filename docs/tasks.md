@@ -20,9 +20,10 @@ C0 repo setup ─▶ C6a core client ─▶ C6b payments + events ─▶ C6c rel
 - [x] `CLAUDE.md`, `.claude/agents/` (simplicity, security, code, gap), `.claude/settings.json`
 - [x] `docs/plan.md`, `docs/tasks.md`, `docs/handoffs/C6a.md`
 - [x] `README.md` (placeholder), `LICENSE` (MIT), `.gitignore`
-- [ ] First push: `main` and `staging` from the first commit, `staging` as the default branch, then this branch's PR into `staging`
+- [x] First push: `main` and `staging` from an empty first commit, `staging` as the default branch, this branch's PR into `staging`
+- [x] Wiki off
 - [ ] Repository rulesets on `main` and `staging`: PR required, no force-push, no deletion, squash only into `staging`, merge commit only into `main`
-- [ ] Settings: no org-level Actions secrets shared with this repo; Actions may not run on pull requests from forks without approval; wiki off
+- [ ] Settings: no org-level Actions secrets shared with this repo; Actions may not run on pull requests from forks without approval
 
 ### C6a — Package, tooling and core client · `not started`
 
