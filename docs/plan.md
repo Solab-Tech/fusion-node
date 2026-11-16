@@ -35,15 +35,15 @@ await fusion.events.list({ paymentId: payment.id });
 
 The merchant API, `https://api.usefusion.com/v1`, as described by `spec/checkout-openapi.json`:
 
-| SDK call                   | API                           | Notes                                                       |
-| -------------------------- | ----------------------------- | ----------------------------------------------------------- |
-| `payments.create(body, o)` | `POST /v1/payments`           | returns the hosted page `url`; `Idempotency-Key` always sent |
-| `payments.retrieve(id)`    | `GET /v1/payments/{id}`       |                                                             |
-| `payments.verify(id)`      | `POST /v1/payments/{id}/verify` | asks the gateway (throttled by the API to once per 10 s)  |
-| `payments.list(query)`     | `GET /v1/payments`            | filters `status`, `merchantReference`; cursor paging        |
-| `events.retrieve(id)`      | `GET /v1/events/{id}`         |                                                             |
-| `events.list(query)`       | `GET /v1/events`              | filters `type`, `paymentId`; cursor paging                  |
-| `webhooks.verify(…)`       | — (no request)                | **C6d, after 0.1.0**: checks a webhook Fusion sent          |
+| SDK call                   | API                             | Notes                                                        |
+| -------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| `payments.create(body, o)` | `POST /v1/payments`             | returns the hosted page `url`; `Idempotency-Key` always sent |
+| `payments.retrieve(id)`    | `GET /v1/payments/{id}`         |                                                              |
+| `payments.verify(id)`      | `POST /v1/payments/{id}/verify` | asks the gateway (throttled by the API to once per 10 s)     |
+| `payments.list(query)`     | `GET /v1/payments`              | filters `status`, `merchantReference`; cursor paging         |
+| `events.retrieve(id)`      | `GET /v1/events/{id}`           |                                                              |
+| `events.list(query)`       | `GET /v1/events`                | filters `type`, `paymentId`; cursor paging                   |
+| `webhooks.verify(…)`       | — (no request)                  | **C6d, after 0.1.0**: checks a webhook Fusion sent           |
 
 **Not covered, on purpose:**
 
@@ -60,16 +60,17 @@ The merchant API, `https://api.usefusion.com/v1`, as described by `spec/checkout
 
 `new Fusion(secretKey, options?)`
 
-| Option       | Default                     | Why                                                        |
-| ------------ | --------------------------- | ---------------------------------------------------------- |
-| `baseUrl`    | `https://api.usefusion.com` | local development and tests                                |
+| Option       | Default                     | Why                                                       |
+| ------------ | --------------------------- | --------------------------------------------------------- |
+| `baseUrl`    | `https://api.usefusion.com` | local development and tests                               |
 | `timeout`    | 30 000 ms                   | per attempt; a hung connection must not hang the merchant |
-| `maxRetries` | 2                           | retries after the first attempt                            |
-| `fetch`      | the global `fetch`          | runtimes or tests that bring their own                     |
+| `maxRetries` | 2                           | retries after the first attempt                           |
+| `fetch`      | the global `fetch`          | runtimes or tests that bring their own                    |
 
 - The key must match `fsk_(test|live)_…`. A `fpk_…` or `whsec_…` key, an empty value or a
   non-string throws `FusionConfigError` immediately, saying which key to use. The client exposes
-  `mode` (`"test"` or `"live"`), read from the prefix.
+  `mode` (`"sandbox"` or `"live"`, the API's own words for it), read from the prefix.
+- Successful responses are `{ data: <resource> }`; every call returns `data`.
 - The key is held privately and never appears in `toString`, `toJSON`, `util.inspect`, an error or
   a URL.
 - Every request sends `User-Agent: fusion-node/<version>` (where the runtime allows it) and
@@ -82,16 +83,16 @@ All errors extend `FusionError`. The API's envelope
 subclass that keeps every field, plus `requestId` from the `x-request-id` response header (the
 API sets it on every response), so a merchant can quote it to support:
 
-| Class                       | When                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `FusionAuthenticationError` | 401 (`invalid_api_key`, `publishable_key_not_allowed`)                |
-| `FusionInvalidRequestError` | 400, 404, 413, 422 (`invalid_request`, `payment_not_found`, …)        |
-| `FusionConflictError`       | 409 (`merchant_reference_taken`, `idempotency_key_reused`, …)         |
-| `FusionRateLimitError`      | 429, with `retryAfter` in seconds                                     |
-| `FusionApiError`            | any other status, including 5xx                                       |
-| `FusionConnectionError`     | no response: network failure, DNS, timeout, abort                     |
-| `FusionConfigError`         | bad constructor input                                                 |
-| `FusionSignatureError`      | **C6d**: a webhook that fails verification, with `reason`             |
+| Class                       | When                                                           |
+| --------------------------- | -------------------------------------------------------------- |
+| `FusionAuthenticationError` | 401 (`invalid_api_key`, `publishable_key_not_allowed`)         |
+| `FusionInvalidRequestError` | 400, 404, 413, 422 (`invalid_request`, `payment_not_found`, …) |
+| `FusionConflictError`       | 409 (`merchant_reference_taken`, `idempotency_key_reused`, …)  |
+| `FusionRateLimitError`      | 429, with `retryAfter` in seconds                              |
+| `FusionApiError`            | any other status, including 403 and 5xx                        |
+| `FusionConnectionError`     | no response: network failure, DNS, timeout, abort              |
+| `FusionConfigError`         | bad constructor input                                          |
+| `FusionSignatureError`      | **C6d**: a webhook that fails verification, with `reason`      |
 
 A response that is not the envelope (a proxy's HTML 502) is still a `FusionApiError` with the
 status and a plain message, never a JSON `SyntaxError`.
@@ -109,9 +110,9 @@ status and a plain message, never a JSON `SyntaxError`.
 
 ### Paging
 
-`list()` returns a page object (`items`, `nextCursor`) that is also async-iterable over every item
-of every page, fetching the next page only when the loop reaches it. Breaking out of the loop
-stops fetching.
+`list()` returns a `PagePromise`: `await` it for a `Page` (`items`, `nextCursor`, `nextPage()`),
+or `for await` over it for every item of every page, fetching the next page only when the loop
+reaches it. Breaking out of the loop stops fetching. Nothing is fetched until it is used.
 
 ### Types
 
@@ -143,16 +144,16 @@ const event = await fusion.webhooks.verify(rawBody, req.header("Fusion-Signature
 
 ## Decisions
 
-| Id  | Decision                                                                                                                                                               |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1  | Public repo `Solab-Tech/fusion-node`. It moves to a public Fusion GitHub org later; nothing here may assume the org's name.                                             |
-| P2  | Package `@usefusion/node` on **public npm** (the `usefusion` npm org), published by trusted publishing with provenance from GitHub Actions.                            |
-| P3  | Zero runtime dependencies; `fetch` + Web Crypto; Node 20+, Bun, Deno, edge runtimes.                                                                                    |
-| P4  | Types from the merchant API spec, copied in by hand for now (`spec/checkout-openapi.json`). An automated sync is C6e.                                                   |
-| P5  | `webhooks.verify()` ships after 0.1.0 (C6d) and is async.                                                                                                              |
-| P6  | MIT license.                                                                                                                                                           |
-| P7  | Server-only. No browser bundle, no publishable key support until an API takes one.                                                                                      |
-| P8  | No webhook-endpoint management: the dashboard does it.                                                                                                                  |
+| Id  | Decision                                                                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1  | Public repo `Solab-Tech/fusion-node`. It moves to a public Fusion GitHub org later; nothing here may assume the org's name.                 |
+| P2  | Package `@usefusion/node` on **public npm** (the `usefusion` npm org), published by trusted publishing with provenance from GitHub Actions. |
+| P3  | Zero runtime dependencies; `fetch` + Web Crypto; Node 20+, Bun, Deno, edge runtimes.                                                        |
+| P4  | Types from the merchant API spec, copied in by hand for now (`spec/checkout-openapi.json`). An automated sync is C6e.                       |
+| P5  | `webhooks.verify()` ships after 0.1.0 (C6d) and is async.                                                                                   |
+| P6  | MIT license.                                                                                                                                |
+| P7  | Server-only. No browser bundle, no publishable key support until an API takes one.                                                          |
+| P8  | No webhook-endpoint management: the dashboard does it.                                                                                      |
 
 ## Open questions
 

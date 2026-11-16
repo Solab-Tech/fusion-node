@@ -22,34 +22,37 @@ C0 repo setup ─▶ C6a core client ─▶ C6b payments + events ─▶ C6c rel
 - [x] `README.md` (placeholder), `LICENSE` (MIT), `.gitignore`
 - [x] First push: `main` and `staging` from an empty first commit, `staging` as the default branch, this branch's PR into `staging`
 - [x] Wiki off
-- [ ] Repository rulesets on `main` and `staging`: PR required, no force-push, no deletion, squash only into `staging`, merge commit only into `main`
+- [ ] Repository rulesets on `main` and `staging`: PR required, no force-push, no deletion, squash only into `staging`, merge commit only into `main`; require the CI checks
 - [ ] Settings: no org-level Actions secrets shared with this repo; Actions may not run on pull requests from forks without approval
 
-### C6a — Package, tooling and core client · `not started`
+### C6a — Package, tooling and core client · `done` (built with C6b in one session, `chore/sdk-init`)
 
-Handoff: [`handoffs/C6a.md`](./handoffs/C6a.md)
+- [x] `package.json` (`@usefusion/node`, `0.1.0`, MIT, `engines.node >=20`, `exports` for ESM + CommonJS + types, `files: ["dist"]`, no `dependencies`)
+- [x] Build: two `tsc` passes (`dist/esm`, `dist/cjs` marked CommonJS by `scripts/mark-cjs.mjs`), no bundler; type-check for `src` (no Node types) and `test`; vitest; prettier
+- [x] TypeScript pinned to 5.9: `openapi-typescript` needs the TypeScript 5 compiler API, which TypeScript 7 no longer exposes
+- [x] CI (`.github/workflows/ci.yml`): lint, test, build and smoke on Node 20, 22, 24; smoke on Bun and Deno from the built `dist`; ESM and CJS export the same names
+- [x] CI check: no AI attribution lines in a PR's commits
+- [ ] Local commit guards: commitlint and `<type>/<name>` branch names (a `commit-msg` / `pre-push` hook), as CLAUDE.md § Branching — only the CI attribution check exists so far
+- [x] `spec/checkout-openapi.json` generated from the API (2026-11-16) and read before committing: only `/v1/payments…` and `/v1/events…`, one server (`api.usefusion.com`); types in `src/generated/api.ts`
+- [x] `Fusion` client: key check (`fsk_test_`/`fsk_live_`; `fpk_`/`whsec_` refused by name), `mode` (`sandbox`/`live`), options (`baseUrl`, `timeout`, `maxRetries`, `fetch`)
+- [x] Key only in a closure and the Authorization header; tested against `String`, `JSON.stringify`, `util.inspect`, errors, URLs; a leaky fetch error is never passed as `cause`
+- [x] Request core: `{ data }` unwrapped, JSON body, `User-Agent`, timeout per attempt, `redirect: "manual"`, error envelope → error classes, `requestId` from `x-request-id`, non-JSON and non-envelope bodies
+- [x] Retries: network/timeout, 429 (`Retry-After`, capped 60 s), 5xx, 409 `idempotency_in_progress`; jittered backoff; tested with an injected sleep
+- [x] simplicity pass; `security-auditor` subagent — no critical or high findings; its three low ones fixed: ids limited to `[A-Za-z0-9_]` (`.`/`..` reached other routes), list pages checked (a missing or repeated cursor looped forever), plain `http:` only for localhost; `idempotencyKey` checked before sending
+- [ ] Cap the size of a response body read into memory (auditor, informational; the timeout bounds time, not memory)
 
-- [ ] `package.json` (`@usefusion/node`, `0.0.0`, MIT, `engines.node >=20`, `exports` for ESM + CommonJS + types, `files: ["dist"]`, no `dependencies`)
-- [ ] Build (ESM + CJS + `.d.ts`), type-check, vitest, prettier
-- [ ] Commit guards: commitlint, `<type>/<name>` branch names, no AI attribution lines (local hook + CI check), as CLAUDE.md § Branching
-- [ ] CI: type-check, tests, build on Node 20, 22, 24, Bun and Deno; both builds load and export the same names
-- [ ] `spec/checkout-openapi.json` from a maintainer; read it before committing (merchant API only: no internal routes); generated types in `src/generated/`
-- [ ] `Fusion` client: key check (`fsk_test_`/`fsk_live_`; `fpk_`/`whsec_` refused with a clear message), `mode`, options (`baseUrl`, `timeout`, `maxRetries`, `fetch`)
-- [ ] Key never in `toString`/`toJSON`/`util.inspect`/errors/URLs — with a test for each
-- [ ] Request core: JSON in and out, `User-Agent`, timeout per attempt, error envelope → error classes (plan § Errors), `requestId` from `x-request-id`, non-JSON error bodies
-- [ ] Retries (plan § Retries), tested with a fake clock
-- [ ] simplicity pass; `security-auditor` subagent (key handling, untrusted responses)
+### C6b — Payments and events · `in progress`
 
-### C6b — Payments and events · `not started`
-
-- [ ] `payments.create` (auto `Idempotency-Key`, caller's own accepted, same key on every retry), `retrieve`, `verify`, `list`
-- [ ] `events.retrieve`, `events.list`
-- [ ] Paging: page object that is also async-iterable over every item; stops fetching on `break`
-- [ ] Public type names aliased from the generated types (`Payment`, `PaymentCreateParams`, `Event`, `PaymentStatus`, …)
-- [ ] Unit tests with a mocked `fetch`
-- [ ] Contract test against a local Fusion stack with a seeded test key (a maintainer runs the stack; skipped in CI without it)
-- [ ] README: install, quickstart, test vs live, errors, idempotency, paging, money in minor units
-- [ ] simplicity pass; `code-reviewer` subagent (amounts); `gap-finder` before merge
+- [x] `payments.create` (generated `Idempotency-Key`, caller's own accepted, same key on every retry), `retrieve`, `verify`, `list`
+- [x] `events.retrieve`, `events.list`
+- [x] Paging: `PagePromise` (await → `Page` with `nextPage()`; `for await` over every item; lazy; stops on `break`)
+- [x] Public type names aliased from the generated types (`Payment`, `PaymentCreateParams`, `PaymentListParams`, `PaymentStatus`, `Event`, `EventListParams`, `EventType`, `Mode`)
+- [x] Unit tests with a mocked `fetch` (50 tests)
+- [x] Contract test written (`test/contract.test.ts`, skipped without `FUSION_CONTRACT_BASE_URL` and `FUSION_CONTRACT_KEY`)
+- [ ] Run the contract test against a local Fusion stack with a seeded test key (a maintainer runs the stack)
+- [x] README: install, quickstart, test vs live, money, payments, events, errors, retries
+- [ ] `code-reviewer` subagent (amounts are passed through unchanged; confirm nothing converts them)
+- [ ] `gap-finder` before the release
 
 ### C6c — Release 0.1.0 · `not started`
 

@@ -22,7 +22,7 @@ surrounding code when a change touches a sensitive path.
    errors, any debug or log hook, URLs and query strings, and test snapshots. A merchant's error
    tracker captures thrown errors whole.
 2. **Webhook signature verification** (`Fusion-Signature: t=<unix s>,v1=<hex HMAC-SHA256(secret,
-   "<t>.<raw body>")>`, one or two `v1` during a secret rotation). Verified on the **raw** body
+"<t>.<raw body>")>`, one or two `v1` during a secret rotation). Verified on the **raw** body
    before any parse; constant-time comparison of every candidate without early exit; timestamp
    tolerance enforced (default 300 s) and a non-finite clock fails closed; malformed or oversized
    headers rejected cheaply; a body that is not a string or bytes is refused, never re-serialised.
