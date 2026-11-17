@@ -35,7 +35,7 @@ holds funds and never sees card data** — the customer pays on the gateway's ow
   live ones. The SDK reads the mode from the prefix; there is no `mode` option to get wrong.
 - **Wrong key types are refused at construction**, with a message saying which key to use:
   `fpk_…` (publishable, never valid on this API) and `whsec_…` (the webhook signing secret).
-- **Success** bodies are the resource itself. **Errors** are always
+- **Success** bodies are `{ data: <resource> }`; the SDK returns `data`. **Errors** are always
   `{ error: { code, message, statusCode, details?, hint?, docUrl? } }` — map them to typed error
   classes that keep every field. Never replace the API's `message` or `hint` with our own words.
 - **Idempotency**: `POST /payments` takes an `Idempotency-Key` (1–255 visible ASCII). The SDK

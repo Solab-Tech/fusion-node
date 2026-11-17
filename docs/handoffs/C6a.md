@@ -21,13 +21,13 @@ means each resource is a few lines.
 
 ## What exists
 
-| Thing           | Path                       | Use                                   |
-| --------------- | -------------------------- | ------------------------------------- |
-| Conventions     | `CLAUDE.md`                | the rules                             |
-| Plan            | `docs/plan.md`             | the design you implement              |
-| Tracker         | `docs/tasks.md`            | tick C6a items as they land           |
-| Reviewer rubrics| `.claude/agents/*.md`      | pre-commit review                     |
-| Placeholder     | `README.md`, `LICENSE`     | README is rewritten in C6b            |
+| Thing            | Path                   | Use                         |
+| ---------------- | ---------------------- | --------------------------- |
+| Conventions      | `CLAUDE.md`            | the rules                   |
+| Plan             | `docs/plan.md`         | the design you implement    |
+| Tracker          | `docs/tasks.md`        | tick C6a items as they land |
+| Reviewer rubrics | `.claude/agents/*.md`  | pre-commit review           |
+| Placeholder      | `README.md`, `LICENSE` | README is rewritten in C6b  |
 
 There is no `package.json`, no `src/` and no spec yet.
 

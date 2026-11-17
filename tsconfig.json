@@ -1,0 +1,21 @@
+{
+  // Type-checks src and tests. The two build configs below emit src only.
+  "compilerOptions": {
+    "target": "ES2022",
+    // DOM gives fetch, Response, AbortController and crypto without Node's types, so src cannot
+    // lean on anything Node-only. Tests add Node's types in their own folder.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}
