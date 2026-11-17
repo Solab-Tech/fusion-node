@@ -1,6 +1,6 @@
 import { Fusion, type FusionOptions } from "../src/index.js";
 
-/** Obviously fake, as CLAUDE.md requires: never a real key in this public repo. */
+/** Obviously fake: never a real key in this public repo. */
 export const TEST_KEY = `fsk_test_${"0".repeat(40)}`;
 export const LIVE_KEY = `fsk_live_${"0".repeat(40)}`;
 
