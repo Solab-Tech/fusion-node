@@ -8,8 +8,7 @@ the gateways you already use (Paystack, Flutterwave, Interswitch, Moniepoint) wi
 - Errors that say what to do (`code`, `hint`, `docUrl`, `requestId`)
 - Zero dependencies. Node 20+, Bun, Deno, Cloudflare Workers, Vercel Edge. ESM and CommonJS
 
-> **Pre-release.** Version 0.x: the API may change between minor versions. Progress:
-> [`docs/tasks.md`](docs/tasks.md).
+> **Pre-release.** Version 0.x: the API may change between minor versions.
 
 ## Install
 
