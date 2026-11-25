@@ -104,12 +104,12 @@
             "name": "Idempotency-Key",
             "in": "header",
             "required": false,
-            "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (409 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
+            "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
             "schema": {
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[\\x21-\\x7e]{1,255}$",
-              "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (409 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
+              "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
               "type": "string"
             }
           }

@@ -409,7 +409,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
-        /** @description Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (409 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key. */
+        /** @description Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key. */
         "Idempotency-Key"?: string;
       };
       path?: never;
