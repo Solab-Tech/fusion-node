@@ -138,7 +138,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -250,7 +250,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -276,12 +276,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -302,7 +296,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -328,7 +322,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -354,13 +348,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -382,7 +376,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -409,7 +403,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
-        /** @description Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key. */
+        /** @description Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). Visible ASCII; your order id is a good key. */
         "Idempotency-Key"?: string;
       };
       path?: never;
@@ -476,7 +470,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -580,7 +574,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -606,12 +600,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -632,7 +620,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -658,7 +646,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -684,7 +672,33 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            error: {
+              code: string;
+              message: string;
+              statusCode: number;
+              details?: unknown;
+              hint?: string;
+              docUrl?: string;
+            };
+          };
+        };
+      };
+      /** @description Error */
+      413: {
+        headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -710,7 +724,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -736,13 +750,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -764,7 +778,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -804,7 +818,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -906,7 +920,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -932,12 +946,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -958,7 +966,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -984,7 +992,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1010,13 +1018,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -1038,7 +1046,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1078,7 +1086,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1180,7 +1188,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1206,12 +1214,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1232,7 +1234,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1258,7 +1260,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1284,13 +1286,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -1312,7 +1314,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1367,7 +1369,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1531,7 +1533,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1557,12 +1559,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1583,7 +1579,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1609,7 +1605,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1635,13 +1631,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -1663,7 +1659,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1703,7 +1699,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1861,7 +1857,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1887,12 +1883,6 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
-          "RateLimit-Limit"?: number;
-          /** @description Requests left in the bucket. */
-          "RateLimit-Remaining"?: number;
-          /** @description Seconds until the bucket is full again. */
-          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1913,7 +1903,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1939,7 +1929,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
@@ -1965,13 +1955,13 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;
           /** @description Seconds until the bucket is full again. */
           "RateLimit-Reset"?: number;
-          /** @description Seconds to wait before sending the request again. */
+          /** @description Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone. */
           "Retry-After"?: number;
           [name: string]: unknown;
         };
@@ -1993,7 +1983,7 @@ export interface operations {
         headers: {
           /** @description This request's id, on every response: quote it to support. */
           "x-request-id"?: string;
-          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          /** @description The bucket's size: the burst the project may send at once. */
           "RateLimit-Limit"?: number;
           /** @description Requests left in the bucket. */
           "RateLimit-Remaining"?: number;

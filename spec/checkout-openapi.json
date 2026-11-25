@@ -104,12 +104,12 @@
             "name": "Idempotency-Key",
             "in": "header",
             "required": false,
-            "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
+            "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). Visible ASCII; your order id is a good key.",
             "schema": {
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[\\x21-\\x7e]{1,255}$",
-              "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key.",
+              "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). Visible ASCII; your order id is a good key.",
               "type": "string"
             }
           }
@@ -246,7 +246,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -747,7 +747,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -813,24 +813,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -883,7 +865,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -951,7 +933,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1019,7 +1001,75 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$id": "ErrorResponse",
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message",
+                        "statusCode"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "statusCode": {
+                          "type": "integer"
+                        },
+                        "details": {},
+                        "hint": {
+                          "type": "string"
+                        },
+                        "docUrl": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1087,7 +1137,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1155,7 +1205,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1173,7 +1223,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1229,7 +1279,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1371,7 +1421,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1888,7 +1938,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -1954,24 +2004,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -2024,7 +2056,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2092,7 +2124,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2160,7 +2192,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2178,7 +2210,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2234,7 +2266,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2334,7 +2366,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2826,7 +2858,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -2892,24 +2924,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -2962,7 +2976,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3030,7 +3044,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3098,7 +3112,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3116,7 +3130,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3172,7 +3186,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3273,7 +3287,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3765,7 +3779,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3831,24 +3845,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -3901,7 +3897,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -3969,7 +3965,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -4037,7 +4033,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -4055,7 +4051,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -4111,7 +4107,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -4254,7 +4250,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -4941,7 +4937,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5007,24 +5003,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -5077,7 +5055,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5145,7 +5123,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5213,7 +5191,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5231,7 +5209,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5287,7 +5265,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -5384,7 +5362,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6046,7 +6024,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6112,24 +6090,6 @@
                 "schema": {
                   "type": "string"
                 }
-              },
-              "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Remaining": {
-                "description": "Requests left in the bucket.",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "RateLimit-Reset": {
-                "description": "Seconds until the bucket is full again.",
-                "schema": {
-                  "type": "integer"
-                }
               }
             },
             "content": {
@@ -6182,7 +6142,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6250,7 +6210,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6318,7 +6278,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6336,7 +6296,7 @@
                 }
               },
               "Retry-After": {
-                "description": "Seconds to wait before sending the request again.",
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
                 "schema": {
                   "type": "integer"
                 }
@@ -6392,7 +6352,7 @@
                 }
               },
               "RateLimit-Limit": {
-                "description": "The bucket's size. Not on a 401, which is answered before the bucket is read.",
+                "description": "The bucket's size: the burst the project may send at once.",
                 "schema": {
                   "type": "integer"
                 }
