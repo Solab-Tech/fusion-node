@@ -19,7 +19,7 @@ export interface paths {
     put?: never;
     /**
      * Create a payment
-     * @description Creates a payment and its hosted checkout page (`url`): send the customer there. No gateway is called yet; the customer picks one on the page. Send an `Idempotency-Key` header (1–255 characters) to make retries safe: the same key and body return the first payment (with `Idempotent-Replayed: true`), another body with the key is refused.
+     * @description Creates a payment and its hosted checkout page (`url`): send the customer there. No gateway is called yet; the customer picks one on the page. Send an `Idempotency-Key` so a retry after a timeout returns the first payment instead of making a second.
      */
     post: operations["post_payments"];
     delete?: never;
@@ -136,6 +136,14 @@ export interface operations {
       /** @description Success */
       200: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -160,7 +168,7 @@ export interface operations {
                   | "expired"
                   | "canceled";
                 /**
-                 * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+                 * @description Integer minor units: ₦5,000.00 is 500000.
                  * @example 500000
                  */
                 amountMinor: number;
@@ -217,7 +225,8 @@ export interface operations {
                   /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                   lateSuccessAt: string | null;
                 }[];
-                /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+                paymentLinkId: string | null;
+                /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
                 metadata: {
                   [key: string]: string;
                 };
@@ -239,6 +248,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -257,6 +274,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -275,6 +300,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -293,6 +326,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -311,6 +352,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -329,6 +380,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -349,7 +408,10 @@ export interface operations {
   post_payments: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (409 `idempotency_key_reused`). 1–255 visible ASCII characters; your order id is a good key. */
+        "Idempotency-Key"?: string;
+      };
       path?: never;
       cookie?: never;
     };
@@ -396,7 +458,7 @@ export interface operations {
            */
           expiresIn?: number;
           /**
-           * @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.
+           * @description Your own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.
            * @example {
            *       "orderId": "1042",
            *       "channel": "web"
@@ -412,6 +474,16 @@ export interface operations {
       /** @description Success */
       201: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description `true` when this is the first payment again, replayed for a repeated `Idempotency-Key`. */
+          "Idempotent-Replayed"?: "true";
           [name: string]: unknown;
         };
         content: {
@@ -429,7 +501,7 @@ export interface operations {
               status:
                 "requires_payment" | "processing" | "succeeded" | "failed" | "expired" | "canceled";
               /**
-               * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+               * @description Integer minor units: ₦5,000.00 is 500000.
                * @example 500000
                */
               amountMinor: number;
@@ -486,7 +558,8 @@ export interface operations {
                 /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                 lateSuccessAt: string | null;
               }[];
-              /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+              paymentLinkId: string | null;
+              /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
               metadata: {
                 [key: string]: string;
               };
@@ -505,6 +578,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -523,6 +604,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -541,6 +630,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -559,6 +656,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -577,6 +682,14 @@ export interface operations {
       /** @description Error */
       409: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -595,6 +708,14 @@ export interface operations {
       /** @description Error */
       422: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -613,6 +734,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -631,6 +762,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -663,6 +802,14 @@ export interface operations {
       /** @description Success */
       200: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -680,7 +827,7 @@ export interface operations {
               status:
                 "requires_payment" | "processing" | "succeeded" | "failed" | "expired" | "canceled";
               /**
-               * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+               * @description Integer minor units: ₦5,000.00 is 500000.
                * @example 500000
                */
               amountMinor: number;
@@ -737,7 +884,8 @@ export interface operations {
                 /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                 lateSuccessAt: string | null;
               }[];
-              /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+              paymentLinkId: string | null;
+              /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
               metadata: {
                 [key: string]: string;
               };
@@ -756,6 +904,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -774,6 +930,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -792,6 +956,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -810,6 +982,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -828,6 +1008,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -846,6 +1036,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -878,6 +1076,14 @@ export interface operations {
       /** @description Success */
       200: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -895,7 +1101,7 @@ export interface operations {
               status:
                 "requires_payment" | "processing" | "succeeded" | "failed" | "expired" | "canceled";
               /**
-               * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+               * @description Integer minor units: ₦5,000.00 is 500000.
                * @example 500000
                */
               amountMinor: number;
@@ -952,7 +1158,8 @@ export interface operations {
                 /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                 lateSuccessAt: string | null;
               }[];
-              /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+              paymentLinkId: string | null;
+              /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
               metadata: {
                 [key: string]: string;
               };
@@ -971,6 +1178,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -989,6 +1204,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1007,6 +1230,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1025,6 +1256,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1043,6 +1282,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1061,6 +1310,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1108,6 +1365,14 @@ export interface operations {
       /** @description Success */
       200: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1116,7 +1381,10 @@ export interface operations {
               /** @description Newest first. */
               items: (
                 | {
-                    /** @description `evt_…`, the same on every retry: dedupe on it. */
+                    /**
+                     * @description `evt_…`, the same on every retry: dedupe on it.
+                     * @example evt_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                     */
                     id: string;
                     /** @constant */
                     object: "event";
@@ -1152,7 +1420,7 @@ export interface operations {
                           | "expired"
                           | "canceled";
                         /**
-                         * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+                         * @description Integer minor units: ₦5,000.00 is 500000.
                          * @example 500000
                          */
                         amountMinor: number;
@@ -1209,7 +1477,8 @@ export interface operations {
                           /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                           lateSuccessAt: string | null;
                         }[];
-                        /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+                        paymentLinkId: string | null;
+                        /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
                         metadata: {
                           [key: string]: string;
                         };
@@ -1225,7 +1494,10 @@ export interface operations {
                     };
                   }
                 | {
-                    /** @description `evt_…`, the same on every retry: dedupe on it. */
+                    /**
+                     * @description `evt_…`, the same on every retry: dedupe on it.
+                     * @example evt_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                     */
                     id: string;
                     /** @constant */
                     object: "event";
@@ -1237,7 +1509,10 @@ export interface operations {
                     createdAt: string;
                     data: {
                       object: {
-                        /** @description `whe_…` */
+                        /**
+                         * @description `whe_…`
+                         * @example whe_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                         */
                         id: string;
                         /** @constant */
                         object: "webhook_endpoint";
@@ -1254,6 +1529,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1272,6 +1555,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1290,6 +1581,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1308,6 +1607,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1326,6 +1633,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1344,6 +1661,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1376,13 +1701,24 @@ export interface operations {
       /** @description Success */
       200: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
           "application/json": {
             data:
               | {
-                  /** @description `evt_…`, the same on every retry: dedupe on it. */
+                  /**
+                   * @description `evt_…`, the same on every retry: dedupe on it.
+                   * @example evt_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                   */
                   id: string;
                   /** @constant */
                   object: "event";
@@ -1418,7 +1754,7 @@ export interface operations {
                         | "expired"
                         | "canceled";
                       /**
-                       * @description Integer minor units (R2.7): ₦5,000.00 is 500000.
+                       * @description Integer minor units: ₦5,000.00 is 500000.
                        * @example 500000
                        */
                       amountMinor: number;
@@ -1475,7 +1811,8 @@ export interface operations {
                         /** @description Set when this attempt turned out paid after it had ended (switched away from, abandoned, canceled or expired). */
                         lateSuccessAt: string | null;
                       }[];
-                      /** @description The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
+                      paymentLinkId: string | null;
+                      /** @description Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500. */
                       metadata: {
                         [key: string]: string;
                       };
@@ -1491,7 +1828,10 @@ export interface operations {
                   };
                 }
               | {
-                  /** @description `evt_…`, the same on every retry: dedupe on it. */
+                  /**
+                   * @description `evt_…`, the same on every retry: dedupe on it.
+                   * @example evt_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                   */
                   id: string;
                   /** @constant */
                   object: "event";
@@ -1503,7 +1843,10 @@ export interface operations {
                   createdAt: string;
                   data: {
                     object: {
-                      /** @description `whe_…` */
+                      /**
+                       * @description `whe_…`
+                       * @example whe_8fK2mQ9xLr4TzW1nB7cVd3Hs
+                       */
                       id: string;
                       /** @constant */
                       object: "webhook_endpoint";
@@ -1516,6 +1859,14 @@ export interface operations {
       /** @description Error */
       400: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1534,6 +1885,14 @@ export interface operations {
       /** @description Error */
       401: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1552,6 +1911,14 @@ export interface operations {
       /** @description Error */
       403: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1570,6 +1937,14 @@ export interface operations {
       /** @description Error */
       404: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1588,6 +1963,16 @@ export interface operations {
       /** @description Error */
       429: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
+          /** @description Seconds to wait before sending the request again. */
+          "Retry-After"?: number;
           [name: string]: unknown;
         };
         content: {
@@ -1606,6 +1991,14 @@ export interface operations {
       /** @description Error */
       500: {
         headers: {
+          /** @description This request's id, on every response: quote it to support. */
+          "x-request-id"?: string;
+          /** @description The bucket's size. Not on a 401, which is answered before the bucket is read. */
+          "RateLimit-Limit"?: number;
+          /** @description Requests left in the bucket. */
+          "RateLimit-Remaining"?: number;
+          /** @description Seconds until the bucket is full again. */
+          "RateLimit-Reset"?: number;
           [name: string]: unknown;
         };
         content: {
