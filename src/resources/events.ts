@@ -1,4 +1,4 @@
-import { PagePromise } from "../page.js";
+import { listPages, type PagePromise } from "../page.js";
 import { idPath, type Transport } from "../request.js";
 import type { Event, EventListParams } from "../types.js";
 
@@ -18,12 +18,6 @@ export class Events {
    * is not guaranteed — order by `data.object.version`.
    */
   list(params: EventListParams = {}): PagePromise<Event> {
-    return new PagePromise((cursor) =>
-      this.#request({
-        method: "GET",
-        path: "/v1/events",
-        query: { ...params, ...(cursor === undefined ? {} : { cursor }) },
-      }),
-    );
+    return listPages(this.#request, "/v1/events", params);
   }
 }

@@ -1,4 +1,5 @@
 import { FusionApiError } from "./errors.js";
+import type { Transport } from "./request.js";
 
 interface ListBody<T> {
   items: T[];
@@ -70,6 +71,16 @@ export class PagePromise<T> implements PromiseLike<Page<T>>, AsyncIterable<T> {
     return this.#firstPage().then(onFulfilled, onRejected);
   }
 
+  catch<B = never>(
+    onRejected?: ((reason: unknown) => B | PromiseLike<B>) | null,
+  ): Promise<Page<T> | B> {
+    return this.then(undefined, onRejected);
+  }
+
+  finally(onFinally?: (() => void) | null): Promise<Page<T>> {
+    return this.#firstPage().finally(onFinally);
+  }
+
   async *[Symbol.asyncIterator](): AsyncIterator<T> {
     let page: Page<T> | null = await this.#firstPage();
     while (page) {
@@ -77,4 +88,15 @@ export class PagePromise<T> implements PromiseLike<Page<T>>, AsyncIterable<T> {
       page = await page.nextPage();
     }
   }
+}
+
+/** A resource's `list()`: pages of `path`, each fetched with the filters and the cursor. */
+export function listPages<T>(
+  request: Transport,
+  path: string,
+  params: Record<string, string | number | undefined>,
+): PagePromise<T> {
+  return new PagePromise((cursor) =>
+    request({ method: "GET", path, query: { ...params, cursor } }),
+  );
 }

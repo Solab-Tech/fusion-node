@@ -13,15 +13,12 @@ describe("new Fusion()", () => {
     ["a publishable key", `fpk_test_${"0".repeat(40)}`, /publishable key/],
     ["a webhook secret", `whsec_test_${"0".repeat(40)}`, /webhook signing secret/],
     ["an empty string", "", /Pass your secret key/],
+    ["nothing, from plain JavaScript", undefined as unknown as string, /Pass your secret key/],
     ["something else", "sk_test_123", /not a Fusion secret key/],
     ["a key with a space", `${TEST_KEY} `, /not a Fusion secret key/],
   ])("refuses %s, naming the right key", (_, key, message) => {
     expect(() => new Fusion(key)).toThrow(FusionConfigError);
     expect(() => new Fusion(key)).toThrow(message);
-  });
-
-  it("refuses a non-string key from plain JavaScript", () => {
-    expect(() => new Fusion(undefined as unknown as string)).toThrow(FusionConfigError);
   });
 
   it.each([

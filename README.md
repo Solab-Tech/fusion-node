@@ -118,8 +118,9 @@ try {
 
 ## Retries and timeouts
 
-Network errors, timeouts, 429 and 5xx are retried (twice by default), waiting `Retry-After` when
-the API sends it and backing off otherwise. A retried create reuses its `Idempotency-Key`, so it
+Network errors, timeouts, 429, 5xx, and a 409 while the first request under the same
+`Idempotency-Key` is still running are retried (twice by default), waiting `Retry-After` when the
+API sends it and backing off otherwise. A retried create reuses its `Idempotency-Key`, so it
 can never make a second payment.
 
 ```ts

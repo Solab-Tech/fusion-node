@@ -40,15 +40,24 @@ export function json(status: number, body: unknown, headers: Record<string, stri
 
 export const ok = (data: unknown, status = 200) => json(status, { data });
 
-export const apiError = (status: number, code: string, extra: Record<string, unknown> = {}) =>
-  json(status, { error: { code, message: `${code} message`, statusCode: status, ...extra } });
+export const apiError = (
+  status: number,
+  code: string,
+  extra: Record<string, unknown> = {},
+  headers: Record<string, string> = {},
+) =>
+  json(
+    status,
+    { error: { code, message: `${code} message`, statusCode: status, ...extra } },
+    headers,
+  );
 
-/** A client whose retries do not really wait. */
+/** A client against a fake API. */
 export function client(fetch: typeof globalThis.fetch, options: FusionOptions = {}) {
   return new Fusion(TEST_KEY, { fetch, baseUrl: "https://api.test", ...options });
 }
 
-export const payment = (id = "pay_test_aaaaaaaaaaaaaaaaaaaaaaaa", extra = {}) => ({
+export const payment = (id = "pay_test_aaaaaaaaaaaaaaaaaaaaaaaa") => ({
   id,
   object: "payment",
   mode: "sandbox",
@@ -56,5 +65,4 @@ export const payment = (id = "pay_test_aaaaaaaaaaaaaaaaaaaaaaaa", extra = {}) =>
   amountMinor: 500000,
   currency: "NGN",
   url: "https://checkout.example/c/cs_test_x",
-  ...extra,
 });

@@ -1,5 +1,5 @@
 import { FusionConfigError } from "../errors.js";
-import { PagePromise } from "../page.js";
+import { listPages, type PagePromise } from "../page.js";
 import { idPath, type Transport } from "../request.js";
 import type { Payment, PaymentCreateParams, PaymentListParams } from "../types.js";
 
@@ -21,7 +21,8 @@ export class Payments {
 
   /** Creates a payment and its hosted checkout page: send the customer to `payment.url`. */
   async create(params: PaymentCreateParams, options: PaymentCreateOptions = {}): Promise<Payment> {
-    const { idempotencyKey = crypto.randomUUID() } = options;
+    // `?? {}`: plain JavaScript may pass null for "no options".
+    const { idempotencyKey = crypto.randomUUID() } = options ?? {};
     // Checked here: a bad header value makes fetch throw, which would look like a network error.
     if (typeof idempotencyKey !== "string" || !/^[\x21-\x7e]{1,255}$/.test(idempotencyKey)) {
       throw new FusionConfigError("`idempotencyKey` must be 1–255 visible ASCII characters");
@@ -46,12 +47,6 @@ export class Payments {
 
   /** Newest first. `await` for one page, or `for await` over every payment. */
   list(params: PaymentListParams = {}): PagePromise<Payment> {
-    return new PagePromise((cursor) =>
-      this.#request({
-        method: "GET",
-        path: "/v1/payments",
-        query: { ...params, ...(cursor === undefined ? {} : { cursor }) },
-      }),
-    );
+    return listPages(this.#request, "/v1/payments", params);
   }
 }

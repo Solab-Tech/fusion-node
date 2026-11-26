@@ -41,6 +41,10 @@ const MAX_BACKOFF_MS = 8_000;
 
 const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+type RequestError = FusionApiError | FusionConnectionError;
+/** One attempt's outcome. Errors come back, never out: the loop decides whether to retry. */
+type Outcome<T> = { data: T } | { error: RequestError; retryAfterMs?: number | undefined };
+
 /**
  * The one place a request is made. The secret key lives only in this closure — never on an
  * object a merchant can print or serialise — and only ever goes into the Authorization header.
@@ -61,64 +65,68 @@ export function createTransport(options: TransportOptions): Transport {
     };
     if (req.body !== undefined) headers["Content-Type"] = "application/json";
     if (req.idempotencyKey !== undefined) headers["Idempotency-Key"] = req.idempotencyKey;
-    const body = req.body === undefined ? undefined : JSON.stringify(req.body);
+    const body = req.body === undefined ? undefined : toJson(req.body);
 
-    for (let attempt = 0; ; attempt++) {
-      let result: { data: T } | { error: RequestError; retryAfterMs?: number | undefined };
+    const attempt = async (): Promise<Outcome<T>> => {
+      const controller = new AbortController();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      // Raced against the fetch, so a `fetch` that ignores `signal` still ends at the timeout.
+      const timedOut = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(new Error("timed out"));
+        }, timeout);
+      });
       try {
-        result = await send<T>(doFetch, url, { method: req.method, headers, body }, timeout);
+        const response = await Promise.race([
+          doFetch(url, {
+            method: req.method,
+            headers,
+            body: body ?? null,
+            // "manual": the API never redirects, and a redirect must not carry the key elsewhere.
+            redirect: "manual",
+            signal: controller.signal,
+          }),
+          timedOut,
+        ]);
+        const text = await Promise.race([response.text(), timedOut]);
+        return parse<T>(response, text);
       } catch (error) {
-        if (!(error instanceof FusionConnectionError)) throw error;
-        result = { error };
+        // The reason is text, never the error itself as `cause`: some fetch implementations
+        // attach the request, and so the Authorization header, to theirs. Their message may
+        // quote the request too, so the key is cut out of it.
+        const reason = controller.signal.aborted
+          ? `timed out after ${timeout} ms`
+          : error instanceof Error
+            ? error.message.replaceAll(secretKey, "[secret key]")
+            : "network error";
+        return { error: new FusionConnectionError(`Could not reach the Fusion API: ${reason}`) };
+      } finally {
+        clearTimeout(timer);
       }
-      if ("data" in result) return result.data;
-      if (attempt >= maxRetries || !isRetryable(result.error)) throw result.error;
-      await sleep(result.retryAfterMs ?? backoff(attempt));
+    };
+
+    for (let tries = 0; ; tries++) {
+      const outcome = await attempt();
+      if ("data" in outcome) return outcome.data;
+      if (tries >= maxRetries || !isRetryable(outcome.error)) throw outcome.error;
+      await sleep(outcome.retryAfterMs ?? backoff(tries));
     }
   };
 }
 
-type RequestError = FusionApiError | FusionConnectionError;
-
-async function send<T>(
-  doFetch: typeof fetch,
-  url: URL,
-  init: { method: string; headers: Record<string, string>; body: string | undefined },
-  timeout: number,
-): Promise<{ data: T } | { error: FusionApiError; retryAfterMs?: number | undefined }> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+function toJson(body: unknown): string {
   try {
-    // "manual": the API never redirects, and a redirect must not carry the key anywhere else.
-    const response = await doFetch(url, {
-      method: init.method,
-      headers: init.headers,
-      body: init.body ?? null,
-      redirect: "manual",
-      signal: controller.signal,
-    });
-    const text = await response.text();
-    return parse<T>(response, text);
-  } catch (error) {
-    if (error instanceof FusionApiError) throw error;
-    // Never pass the underlying error as `cause`: some fetch implementations attach the request
-    // (and so the Authorization header) to it.
-    const reason = controller.signal.aborted
-      ? `timed out after ${timeout} ms`
-      : error instanceof Error
-        ? error.message
-        : "network error";
-    throw new FusionConnectionError(`Could not reach the Fusion API: ${reason}`);
-  } finally {
-    clearTimeout(timer);
+    return JSON.stringify(body);
+  } catch {
+    throw new FusionConfigError(
+      "The request body is not JSON: a BigInt, or a value that contains itself?",
+    );
   }
 }
 
-function parse<T>(
-  response: Response,
-  text: string,
-): { data: T } | { error: FusionApiError; retryAfterMs?: number | undefined } {
-  const requestId = response.headers.get("x-request-id") ?? undefined;
+function parse<T>(response: Response, text: string): Outcome<T> {
+  const requestId = str(response.headers.get("x-request-id"));
   const json = parseJson(text);
 
   if (response.ok) {
@@ -128,28 +136,26 @@ function parse<T>(
         statusCode: response.status,
         code: "unexpected_response",
         message: `The Fusion API answered ${response.status} without a body this SDK understands`,
-        ...(requestId === undefined ? {} : { requestId }),
+        requestId,
       }),
     };
   }
 
   const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
   const envelope = isObject(json) && isObject(json.error) ? json.error : undefined;
-  const fields = {
+  const error = apiErrorFor({
     statusCode: response.status,
-    code: stringOr(envelope?.code, "unexpected_response"),
-    message: stringOr(
-      envelope?.message,
-      `The Fusion API answered ${response.status} without an error body`,
-    ),
-    ...(envelope !== undefined && "details" in envelope ? { details: envelope.details } : {}),
-    ...optionalString("hint", envelope?.hint),
-    ...optionalString("docUrl", envelope?.docUrl),
-    ...(requestId === undefined ? {} : { requestId }),
+    code: str(envelope?.code) ?? "unexpected_response",
+    message:
+      str(envelope?.message) ?? `The Fusion API answered ${response.status} without an error body`,
+    details: envelope?.details,
+    hint: str(envelope?.hint),
+    docUrl: str(envelope?.docUrl),
+    requestId,
     retryAfter,
-  };
+  });
   return {
-    error: apiErrorFor(fields),
+    error,
     retryAfterMs:
       retryAfter === undefined ? undefined : Math.min(retryAfter * 1000, MAX_RETRY_AFTER_MS),
   };
@@ -166,8 +172,8 @@ function isRetryable(error: RequestError): boolean {
 }
 
 /** 0.5 s, 1 s, 2 s … up to 8 s, each with jitter so many clients don't retry in step. */
-function backoff(attempt: number): number {
-  const ceiling = Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS);
+function backoff(tries: number): number {
+  const ceiling = Math.min(BASE_BACKOFF_MS * 2 ** tries, MAX_BACKOFF_MS);
   return ceiling / 2 + Math.random() * (ceiling / 2);
 }
 
@@ -189,10 +195,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function stringOr(value: unknown, fallback: string): string {
-  return typeof value === "string" ? value : fallback;
-}
-
-function optionalString<K extends string>(key: K, value: unknown): { [P in K]?: string } {
-  return typeof value === "string" ? ({ [key]: value } as { [P in K]: string }) : {};
+function str(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
