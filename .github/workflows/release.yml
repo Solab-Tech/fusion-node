@@ -1,0 +1,42 @@
+# Publishes @usefusion/node to npm when a version tag is pushed (`git tag v0.1.0 &&
+# git push origin v0.1.0`, or `gh release create v0.1.0`). The tag must name the
+# version in package.json. `npm publish` runs prepublishOnly first (lint, test,
+# build, smoke), then signs the tarball with provenance, which ties it to this
+# commit and run on npmjs.com.
+#
+# Needs one secret, NPM_TOKEN: a granular access token from the npm account that
+# owns the @usefusion scope, with read and write on that scope only.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - name: The tag names the package version
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME, but package.json is $version"
+            exit 1
+          fi
+      - run: pnpm install --frozen-lockfile
+      - run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
