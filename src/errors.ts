@@ -57,7 +57,7 @@ export class FusionInvalidRequestError extends FusionApiError {
   override name = "FusionInvalidRequestError";
 }
 
-/** 409: a `merchantReference` already used, or an `Idempotency-Key` reused for another body. */
+/** 409: a `merchantReference` already used, or the first request with this `Idempotency-Key` still running. */
 export class FusionConflictError extends FusionApiError {
   override name = "FusionConflictError";
 }

@@ -3,7 +3,77 @@
   "info": {
     "title": "Fusion Checkout API",
     "version": "0.0.0",
-    "description": "Test keys (`fsk_test_…`) create sandbox payments, live keys live ones; the key decides, on the same host.\n\nEvery error is `{ error: { code, message, statusCode, details?, hint, docUrl } }`:\n\n| code | what to do |\n|---|---|\n| `invalid_request` | A field broke a rule: `details` names it and the rule. |\n| `invalid_body` | Send a JSON object with Content-Type: application/json. |\n| `payload_too_large` | Keep the body under 64 KiB; metadata is at most 50 short pairs. |\n| `card_data_not_allowed` | Never send card numbers to Fusion, in metadata or anywhere else: the customer enters them on the gateway's page. |\n| `invalid_api_key` | Use a secret key (fsk_test_… or fsk_live_…) from the dashboard, as `Authorization: Bearer <key>`. |\n| `publishable_key_not_allowed` | Server calls need the secret key (fsk_…), never the publishable one. |\n| `not_found` | Check the method and path against the API reference. |\n| `payment_not_found` | Check the id, and that the key is the same project and mode (test or live) as the payment. |\n| `event_not_found` | Check the id, and that the key is the same project and mode (test or live) as the event. |\n| `merchant_reference_taken` | Each payment of a project and mode needs its own merchantReference. |\n| `idempotency_in_progress` | A request with this Idempotency-Key is still running: retry in a few seconds. |\n| `idempotency_key_reused` | An Idempotency-Key names one request: use a new key for a different body. |\n| `amount_too_large` | Split the amount, or ask Fusion to raise the project's limit for this currency. |\n| `currency_not_supported` | Use a currency one of the project's gateways takes (sandbox: NGN, USD, GHS, GBP), or enable the gateway for it. |\n| `no_eligible_gateway` | `details` says why each gateway was left out: turn one on, or widen `gateways`. |\n| `rate_limited` | Wait Retry-After seconds, then retry; spread bursts out. |\n| `internal_error` | Retry with the same Idempotency-Key; contact support with `details.requestId` if it persists. |"
+    "description": "Test keys (`fsk_test_…`) create sandbox payments, live keys live ones; the key decides, on the same host.\n\nEvery error is `{ error: { code, message, statusCode, details?, hint, docUrl } }`:\n\n| code | what to do |\n|---|---|\n| `invalid_request` | A field broke a rule: `details` names it and the rule. |\n| `invalid_body` | Send a JSON object with Content-Type: application/json. |\n| `payload_too_large` | Keep the body under 64 KiB; metadata is at most 50 short pairs. |\n| `card_data_not_allowed` | Never send card numbers to Fusion, in metadata or anywhere else: the customer enters them on the gateway's page. |\n| `invalid_api_key` | Use a secret key (fsk_test_… or fsk_live_…) from the dashboard, as `Authorization: Bearer <key>`. |\n| `publishable_key_not_allowed` | Server calls need the secret key (fsk_…), never the publishable one. |\n| `not_found` | Check the method and path against the API reference. |\n| `payment_not_found` | Check the id, and that the key is the same project and mode (test or live) as the payment. |\n| `event_not_found` | Check the id, and that the key is the same project and mode (test or live) as the event. |\n| `merchant_reference_taken` | Each payment of a project and mode needs its own merchantReference. |\n| `idempotency_in_progress` | A request with this Idempotency-Key is still running: retry in a few seconds. |\n| `idempotency_key_reused` | An Idempotency-Key names one request: use a new key for a different body. |\n| `amount_too_large` | Split the amount, or ask Fusion to raise the project's limit for this currency. |\n| `currency_not_supported` | Use a currency one of the project's gateways takes (sandbox: NGN, USD, GHS, GBP), or enable the gateway for it. |\n| `no_eligible_gateway` | `details` says why each gateway was left out: turn one on, or widen `gateways`. |\n| `rate_limited` | Wait Retry-After seconds, then retry; spread bursts out. |\n| `internal_error` | Retry with the same Idempotency-Key; contact support with `details.requestId` if it persists. |",
+    "x-error-codes": [
+      {
+        "code": "invalid_request",
+        "hint": "A field broke a rule: `details` names it and the rule."
+      },
+      {
+        "code": "invalid_body",
+        "hint": "Send a JSON object with Content-Type: application/json."
+      },
+      {
+        "code": "payload_too_large",
+        "hint": "Keep the body under 64 KiB; metadata is at most 50 short pairs."
+      },
+      {
+        "code": "card_data_not_allowed",
+        "hint": "Never send card numbers to Fusion, in metadata or anywhere else: the customer enters them on the gateway's page."
+      },
+      {
+        "code": "invalid_api_key",
+        "hint": "Use a secret key (fsk_test_… or fsk_live_…) from the dashboard, as `Authorization: Bearer <key>`."
+      },
+      {
+        "code": "publishable_key_not_allowed",
+        "hint": "Server calls need the secret key (fsk_…), never the publishable one."
+      },
+      {
+        "code": "not_found",
+        "hint": "Check the method and path against the API reference."
+      },
+      {
+        "code": "payment_not_found",
+        "hint": "Check the id, and that the key is the same project and mode (test or live) as the payment."
+      },
+      {
+        "code": "event_not_found",
+        "hint": "Check the id, and that the key is the same project and mode (test or live) as the event."
+      },
+      {
+        "code": "merchant_reference_taken",
+        "hint": "Each payment of a project and mode needs its own merchantReference."
+      },
+      {
+        "code": "idempotency_in_progress",
+        "hint": "A request with this Idempotency-Key is still running: retry in a few seconds."
+      },
+      {
+        "code": "idempotency_key_reused",
+        "hint": "An Idempotency-Key names one request: use a new key for a different body."
+      },
+      {
+        "code": "amount_too_large",
+        "hint": "Split the amount, or ask Fusion to raise the project's limit for this currency."
+      },
+      {
+        "code": "currency_not_supported",
+        "hint": "Use a currency one of the project's gateways takes (sandbox: NGN, USD, GHS, GBP), or enable the gateway for it."
+      },
+      {
+        "code": "no_eligible_gateway",
+        "hint": "`details` says why each gateway was left out: turn one on, or widen `gateways`."
+      },
+      {
+        "code": "rate_limited",
+        "hint": "Wait Retry-After seconds, then retry; spread bursts out."
+      },
+      {
+        "code": "internal_error",
+        "hint": "Retry with the same Idempotency-Key; contact support with `details.requestId` if it persists."
+      }
+    ]
   },
   "servers": [
     {
@@ -27,9 +97,23 @@
           "Payments"
         ],
         "summary": "Create a payment",
-        "description": "Creates a payment and its hosted checkout page (`url`): send the customer there. No gateway is called yet; the customer picks one on the page. Send an `Idempotency-Key` header (1–255 characters) to make retries safe: the same key and body return the first payment (with `Idempotent-Replayed: true`), another body with the key is refused.",
+        "description": "Creates a payment and its hosted checkout page (`url`): send the customer there. No gateway is called yet; the customer picks one on the page. Send an `Idempotency-Key` so a retry after a timeout returns the first payment instead of making a second.",
         "operationId": "post_payments",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). Visible ASCII; your order id is a good key.",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[\\x21-\\x7e]{1,255}$",
+              "description": "Makes retries safe: the same key and body return the first payment, with `Idempotent-Replayed: true`; another body with the same key is refused (422 `idempotency_key_reused`). Visible ASCII; your order id is a good key.",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -131,7 +215,7 @@
                   "metadata": {
                     "additionalProperties": false,
                     "maxProperties": 50,
-                    "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                    "description": "Your own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                     "type": "object",
                     "patternProperties": {
                       "^[A-Za-z0-9_.-]{1,40}$": {
@@ -154,6 +238,41 @@
         "responses": {
           "201": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Idempotent-Replayed": {
+                "description": "`true` when this is the first payment again, replayed for a repeated `Idempotency-Key`.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "true"
+                  ]
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -177,6 +296,7 @@
                         "gateway",
                         "gateways",
                         "attempts",
+                        "paymentLinkId",
                         "metadata",
                         "version",
                         "createdAt",
@@ -240,7 +360,7 @@
                         },
                         "amountMinor": {
                           "minimum": 1,
-                          "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                          "description": "Integer minor units: ₦5,000.00 is 500000.",
                           "examples": [
                             500000
                           ],
@@ -548,10 +668,22 @@
                             }
                           }
                         },
+                        "paymentLinkId": {
+                          "anyOf": [
+                            {
+                              "maxLength": 64,
+                              "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "metadata": {
                           "additionalProperties": false,
-                          "maxProperties": 50,
-                          "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                          "maxProperties": 100,
+                          "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                           "type": "object",
                           "patternProperties": {
                             "^[A-Za-z0-9_.-]{1,40}$": {
@@ -607,6 +739,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -649,6 +807,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -691,6 +857,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -733,6 +925,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -775,6 +993,100 @@
           },
           "409": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$id": "ErrorResponse",
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message",
+                        "statusCode"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "statusCode": {
+                          "type": "integer"
+                        },
+                        "details": {},
+                        "hint": {
+                          "type": "string"
+                        },
+                        "docUrl": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -817,6 +1129,32 @@
           },
           "422": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -859,6 +1197,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -901,6 +1271,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1017,6 +1413,32 @@
         "responses": {
           "200": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1051,6 +1473,7 @@
                               "gateway",
                               "gateways",
                               "attempts",
+                              "paymentLinkId",
                               "metadata",
                               "version",
                               "createdAt",
@@ -1114,7 +1537,7 @@
                               },
                               "amountMinor": {
                                 "minimum": 1,
-                                "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                                "description": "Integer minor units: ₦5,000.00 is 500000.",
                                 "examples": [
                                   500000
                                 ],
@@ -1422,10 +1845,22 @@
                                   }
                                 }
                               },
+                              "paymentLinkId": {
+                                "anyOf": [
+                                  {
+                                    "maxLength": 64,
+                                    "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
                               "metadata": {
                                 "additionalProperties": false,
-                                "maxProperties": 50,
-                                "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                                "maxProperties": 100,
+                                "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                                 "type": "object",
                                 "patternProperties": {
                                   "^[A-Za-z0-9_.-]{1,40}$": {
@@ -1495,6 +1930,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1537,6 +1998,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1579,6 +2048,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1621,6 +2116,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1663,6 +2184,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1705,6 +2258,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1779,6 +2358,32 @@
         "responses": {
           "200": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1802,6 +2407,7 @@
                         "gateway",
                         "gateways",
                         "attempts",
+                        "paymentLinkId",
                         "metadata",
                         "version",
                         "createdAt",
@@ -1865,7 +2471,7 @@
                         },
                         "amountMinor": {
                           "minimum": 1,
-                          "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                          "description": "Integer minor units: ₦5,000.00 is 500000.",
                           "examples": [
                             500000
                           ],
@@ -2173,10 +2779,22 @@
                             }
                           }
                         },
+                        "paymentLinkId": {
+                          "anyOf": [
+                            {
+                              "maxLength": 64,
+                              "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "metadata": {
                           "additionalProperties": false,
-                          "maxProperties": 50,
-                          "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                          "maxProperties": 100,
+                          "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                           "type": "object",
                           "patternProperties": {
                             "^[A-Za-z0-9_.-]{1,40}$": {
@@ -2232,6 +2850,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2274,6 +2918,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2316,6 +2968,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2358,6 +3036,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2400,6 +3104,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2442,6 +3178,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2517,6 +3279,32 @@
         "responses": {
           "200": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2540,6 +3328,7 @@
                         "gateway",
                         "gateways",
                         "attempts",
+                        "paymentLinkId",
                         "metadata",
                         "version",
                         "createdAt",
@@ -2603,7 +3392,7 @@
                         },
                         "amountMinor": {
                           "minimum": 1,
-                          "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                          "description": "Integer minor units: ₦5,000.00 is 500000.",
                           "examples": [
                             500000
                           ],
@@ -2911,10 +3700,22 @@
                             }
                           }
                         },
+                        "paymentLinkId": {
+                          "anyOf": [
+                            {
+                              "maxLength": 64,
+                              "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "metadata": {
                           "additionalProperties": false,
-                          "maxProperties": 50,
-                          "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                          "maxProperties": 100,
+                          "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                           "type": "object",
                           "patternProperties": {
                             "^[A-Za-z0-9_.-]{1,40}$": {
@@ -2970,6 +3771,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3012,6 +3839,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3054,6 +3889,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3096,6 +3957,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3138,6 +4025,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3180,6 +4099,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3297,6 +4242,32 @@
         "responses": {
           "200": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3330,6 +4301,9 @@
                                   "id": {
                                     "maxLength": 64,
                                     "description": "`evt_…`, the same on every retry: dedupe on it.",
+                                    "examples": [
+                                      "evt_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                                    ],
                                     "type": "string"
                                   },
                                   "object": {
@@ -3414,6 +4388,7 @@
                                           "gateway",
                                           "gateways",
                                           "attempts",
+                                          "paymentLinkId",
                                           "metadata",
                                           "version",
                                           "createdAt",
@@ -3477,7 +4452,7 @@
                                           },
                                           "amountMinor": {
                                             "minimum": 1,
-                                            "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                                            "description": "Integer minor units: ₦5,000.00 is 500000.",
                                             "examples": [
                                               500000
                                             ],
@@ -3785,10 +4760,22 @@
                                               }
                                             }
                                           },
+                                          "paymentLinkId": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 64,
+                                                "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
                                           "metadata": {
                                             "additionalProperties": false,
-                                            "maxProperties": 50,
-                                            "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                                            "maxProperties": 100,
+                                            "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                                             "type": "object",
                                             "patternProperties": {
                                               "^[A-Za-z0-9_.-]{1,40}$": {
@@ -3853,6 +4840,9 @@
                                   "id": {
                                     "maxLength": 64,
                                     "description": "`evt_…`, the same on every retry: dedupe on it.",
+                                    "examples": [
+                                      "evt_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                                    ],
                                     "type": "string"
                                   },
                                   "object": {
@@ -3898,6 +4888,9 @@
                                           "id": {
                                             "maxLength": 64,
                                             "description": "`whe_…`",
+                                            "examples": [
+                                              "whe_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                                            ],
                                             "type": "string"
                                           },
                                           "object": {
@@ -3936,6 +4929,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3978,6 +4997,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4020,6 +5047,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4062,6 +5115,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4104,6 +5183,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4146,6 +5257,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4217,6 +5354,32 @@
         "responses": {
           "200": {
             "description": "Success",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4239,6 +5402,9 @@
                             "id": {
                               "maxLength": 64,
                               "description": "`evt_…`, the same on every retry: dedupe on it.",
+                              "examples": [
+                                "evt_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                              ],
                               "type": "string"
                             },
                             "object": {
@@ -4323,6 +5489,7 @@
                                     "gateway",
                                     "gateways",
                                     "attempts",
+                                    "paymentLinkId",
                                     "metadata",
                                     "version",
                                     "createdAt",
@@ -4386,7 +5553,7 @@
                                     },
                                     "amountMinor": {
                                       "minimum": 1,
-                                      "description": "Integer minor units (R2.7): ₦5,000.00 is 500000.",
+                                      "description": "Integer minor units: ₦5,000.00 is 500000.",
                                       "examples": [
                                         500000
                                       ],
@@ -4694,10 +5861,22 @@
                                         }
                                       }
                                     },
+                                    "paymentLinkId": {
+                                      "anyOf": [
+                                        {
+                                          "maxLength": 64,
+                                          "description": "The payment link it was made through (`plk_…`), if any; its details are in metadata.",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
                                     "metadata": {
                                       "additionalProperties": false,
-                                      "maxProperties": 50,
-                                      "description": "The merchant's own key-value pairs: at most 50; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
+                                      "maxProperties": 100,
+                                      "description": "Key-value pairs: the merchant's own (at most 50 on create) and, on a payment link's payment, what was bought; at most 100; keys of letters, digits, _ - . (≤ 40); values ≤ 500.",
                                       "type": "object",
                                       "patternProperties": {
                                         "^[A-Za-z0-9_.-]{1,40}$": {
@@ -4762,6 +5941,9 @@
                             "id": {
                               "maxLength": 64,
                               "description": "`evt_…`, the same on every retry: dedupe on it.",
+                              "examples": [
+                                "evt_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                              ],
                               "type": "string"
                             },
                             "object": {
@@ -4807,6 +5989,9 @@
                                     "id": {
                                       "maxLength": 64,
                                       "description": "`whe_…`",
+                                      "examples": [
+                                        "whe_8fK2mQ9xLr4TzW1nB7cVd3Hs"
+                                      ],
                                       "type": "string"
                                     },
                                     "object": {
@@ -4831,6 +6016,32 @@
           },
           "400": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4873,6 +6084,14 @@
           },
           "401": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4915,6 +6134,32 @@
           },
           "403": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4957,6 +6202,32 @@
           },
           "404": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4999,6 +6270,38 @@
           },
           "429": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before sending the request again. An address blocked for guessing keys gets this header alone.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5041,6 +6344,32 @@
           },
           "500": {
             "description": "Error",
+            "headers": {
+              "x-request-id": {
+                "description": "This request's id, on every response: quote it to support.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RateLimit-Limit": {
+                "description": "The bucket's size: the burst the project may send at once.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests left in the bucket.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the bucket is full again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {

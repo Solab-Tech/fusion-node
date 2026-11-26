@@ -106,15 +106,15 @@ try {
 }
 ```
 
-| Class                       | When                                                         |
-| --------------------------- | ------------------------------------------------------------ |
-| `FusionAuthenticationError` | 401: wrong, revoked or non-secret key                        |
-| `FusionInvalidRequestError` | 400, 404, 413, 422: a field broke a rule; `details` names it |
-| `FusionConflictError`       | 409: `merchantReference` taken, `Idempotency-Key` reused     |
-| `FusionRateLimitError`      | 429: `retryAfter` seconds                                    |
-| `FusionApiError`            | any other API error, including 5xx                           |
-| `FusionConnectionError`     | no response: network failure or timeout                      |
-| `FusionConfigError`         | a bad key or option passed to `new Fusion()`                 |
+| Class                       | When                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `FusionAuthenticationError` | 401: wrong, revoked or non-secret key                                                                        |
+| `FusionInvalidRequestError` | 400, 404, 413, 422: a field broke a rule (`details` names it); an `Idempotency-Key` reused with another body |
+| `FusionConflictError`       | 409: `merchantReference` taken, or the first request with this `Idempotency-Key` still running               |
+| `FusionRateLimitError`      | 429: `retryAfter` seconds                                                                                    |
+| `FusionApiError`            | any other API error, including 5xx                                                                           |
+| `FusionConnectionError`     | no response: network failure or timeout                                                                      |
+| `FusionConfigError`         | a bad key or option passed to `new Fusion()`                                                                 |
 
 ## Retries and timeouts
 
