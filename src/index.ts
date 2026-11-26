@@ -1,6 +1,4 @@
-import { Fusion } from "./client.js";
-
-export { Fusion };
+export { Fusion, Fusion as default } from "./client.js";
 export type { FusionOptions } from "./client.js";
 export {
   FusionApiError,
@@ -25,5 +23,3 @@ export type {
   PaymentStatus,
 } from "./types.js";
 export { VERSION } from "./version.js";
-
-export default Fusion;

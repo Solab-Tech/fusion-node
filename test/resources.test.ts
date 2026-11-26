@@ -3,37 +3,32 @@ import { FusionApiError, FusionConfigError, Page } from "../src/index.js";
 import { client, fakeFetch, ok, payment } from "./helpers.js";
 
 describe("payments", () => {
-  it("create sends the body unchanged with a generated Idempotency-Key", async () => {
-    const { fetch, calls } = fakeFetch(ok(payment(), 201));
-    const body = {
-      amountMinor: 500000,
-      currency: "NGN",
-      redirectUrl: "https://shop.example/return",
-      metadata: { orderId: "1042" },
-    };
-    const created = await client(fetch).payments.create(body);
+  const body = {
+    amountMinor: 500000,
+    currency: "NGN",
+    redirectUrl: "https://shop.example/return",
+    metadata: { orderId: "1042" },
+  };
+
+  it("create sends the body unchanged, each call with its own generated Idempotency-Key", async () => {
+    const { fetch, calls } = fakeFetch(ok(payment(), 201), ok(payment(), 201));
+    const fusion = client(fetch);
+    const created = await fusion.payments.create(body);
+    // Plain JavaScript's "no options".
+    await fusion.payments.create(body, null as unknown as undefined);
     expect(created.id).toBe("pay_test_aaaaaaaaaaaaaaaaaaaaaaaa");
     expect(calls[0]).toMatchObject({ method: "POST", body });
     expect(calls[0]!.url.pathname).toBe("/v1/payments");
-    expect(calls[0]!.headers["idempotency-key"]).toMatch(/^[0-9a-f-]{36}$/);
+    const keys = calls.map((c) => c.headers["idempotency-key"]);
+    expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(keys[1]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(keys[0]).not.toBe(keys[1]);
   });
 
   it("create uses the caller's own Idempotency-Key", async () => {
     const { fetch, calls } = fakeFetch(ok(payment(), 201));
-    await client(fetch).payments.create(
-      { amountMinor: 1, currency: "NGN", redirectUrl: "https://shop.example/return" },
-      { idempotencyKey: "order_1042" },
-    );
+    await client(fetch).payments.create(body, { idempotencyKey: "order_1042" });
     expect(calls[0]!.headers["idempotency-key"]).toBe("order_1042");
-  });
-
-  it("each create gets its own generated key", async () => {
-    const { fetch, calls } = fakeFetch(ok(payment(), 201), ok(payment(), 201));
-    const fusion = client(fetch);
-    const body = { amountMinor: 1, currency: "NGN", redirectUrl: "https://shop.example/return" };
-    await fusion.payments.create(body);
-    await fusion.payments.create(body);
-    expect(calls[0]!.headers["idempotency-key"]).not.toBe(calls[1]!.headers["idempotency-key"]);
   });
 
   it("retrieve and verify call the payment's own routes", async () => {
@@ -62,7 +57,6 @@ describe("payments", () => {
     "refuses the idempotencyKey %j without a request",
     async (idempotencyKey) => {
       const { fetch, calls } = fakeFetch();
-      const body = { amountMinor: 1, currency: "NGN", redirectUrl: "https://shop.example/r" };
       await expect(client(fetch).payments.create(body, { idempotencyKey })).rejects.toBeInstanceOf(
         FusionConfigError,
       );
@@ -98,6 +92,20 @@ describe("payments", () => {
       status: "succeeded",
       limit: "50",
     });
+  });
+
+  it("list() has catch and finally, like any promise", async () => {
+    const bad = fakeFetch(ok({ items: "nope", nextCursor: null }));
+    const caught = await client(bad.fetch)
+      .payments.list()
+      .catch((e: unknown) => e);
+    expect(caught).toBeInstanceOf(FusionApiError);
+    const good = fakeFetch(ok({ items: [], nextCursor: null }));
+    let settled = false;
+    await client(good.fetch)
+      .payments.list()
+      .finally(() => void (settled = true));
+    expect(settled).toBe(true);
   });
 
   it("for await walks every page, passing the cursor and keeping the filters", async () => {

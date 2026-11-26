@@ -1,5 +1,5 @@
 {
-  // Type-checks src and tests. The two build configs below emit src only.
+  // Type-checks src and tests. The two build configs beside it emit src only.
   "compilerOptions": {
     "target": "ES2022",
     // DOM gives fetch, Response, AbortController and crypto without Node's types, so src cannot
@@ -13,6 +13,7 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "isolatedModules": true,
+    // false: the CommonJS build rewrites imports; true would refuse to.
     "verbatimModuleSyntax": false,
     "skipLibCheck": true,
     "noEmit": true

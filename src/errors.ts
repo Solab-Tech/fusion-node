@@ -18,9 +18,11 @@ export interface FusionApiErrorFields {
   code: string;
   message: string;
   details?: unknown;
-  hint?: string;
-  docUrl?: string;
-  requestId?: string;
+  hint?: string | undefined;
+  docUrl?: string | undefined;
+  requestId?: string | undefined;
+  /** Seconds, from the `Retry-After` header. Kept by `FusionRateLimitError` only. */
+  retryAfter?: number | undefined;
 }
 
 /**
@@ -67,16 +69,14 @@ export class FusionRateLimitError extends FusionApiError {
   override name = "FusionRateLimitError";
   readonly retryAfter: number | undefined;
 
-  constructor(fields: FusionApiErrorFields & { retryAfter?: number | undefined }) {
+  constructor(fields: FusionApiErrorFields) {
     super(fields);
     this.retryAfter = fields.retryAfter;
   }
 }
 
 /** The error class for a status, so callers can `instanceof` instead of reading numbers. */
-export function apiErrorFor(
-  fields: FusionApiErrorFields & { retryAfter?: number | undefined },
-): FusionApiError {
+export function apiErrorFor(fields: FusionApiErrorFields): FusionApiError {
   switch (fields.statusCode) {
     case 401:
       return new FusionAuthenticationError(fields);

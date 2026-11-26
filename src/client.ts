@@ -9,7 +9,10 @@ export interface FusionOptions {
   baseUrl?: string;
   /** Milliseconds per attempt. Defaults to 30 000. */
   timeout?: number;
-  /** Retries after the first attempt, for network errors, 429 and 5xx. Defaults to 2. */
+  /**
+   * Retries after the first attempt: network errors, 429, 5xx, and a 409 while the first request
+   * under the same `Idempotency-Key` is still running. Defaults to 2.
+   */
   maxRetries?: number;
   /** Defaults to the runtime's global `fetch`. */
   fetch?: typeof fetch;

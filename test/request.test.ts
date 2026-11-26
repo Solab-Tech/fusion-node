@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FusionApiError,
   FusionAuthenticationError,
+  FusionConfigError,
   FusionConflictError,
   FusionConnectionError,
   FusionInvalidRequestError,
@@ -51,6 +52,13 @@ describe("requests", () => {
     expect(calls[0]!.headers["content-type"]).toBe("application/json");
     expect(calls[0]!.body).toEqual({ amountMinor: 500000 });
   });
+
+  it("refuses a body JSON cannot carry, without a request", async () => {
+    const { fetch, calls } = fakeFetch();
+    const bigint = { method: "POST", path: "/v1/payments", body: { amountMinor: 10n } } as const;
+    await expect(transport(fetch).request(bigint)).rejects.toBeInstanceOf(FusionConfigError);
+    expect(calls).toHaveLength(0);
+  });
 });
 
 describe("errors", () => {
@@ -61,43 +69,35 @@ describe("errors", () => {
     [422, "no_eligible_gateway", FusionInvalidRequestError],
     [409, "merchant_reference_taken", FusionConflictError],
     [403, "forbidden", FusionApiError],
-  ])("%i %s → %s", async (status, code, Class) => {
-    const { fetch } = fakeFetch(apiError(status, code));
+  ])("%i %s → %s, not retried", async (status, code, Class) => {
+    const { fetch, calls } = fakeFetch(apiError(status, code));
     const error = await transport(fetch)
       .request(get)
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(Class);
     expect(error).toMatchObject({ statusCode: status, code });
+    expect(calls).toHaveLength(1);
   });
 
   it("keeps every field of the API's error, and the request id", async () => {
     const { fetch } = fakeFetch(
-      apiError(422, "no_eligible_gateway", {
-        details: [{ gateway: "paystack" }],
-        hint: "Turn one on",
-        docUrl: "https://docs.test/e",
-      }),
-    );
-    const replyWithId = fakeFetch(
-      json(
+      apiError(
         422,
-        { error: { code: "x", message: "m", statusCode: 422 } },
+        "no_eligible_gateway",
+        { details: [{ gateway: "paystack" }], hint: "Turn one on", docUrl: "https://docs.test/e" },
         { "x-request-id": "req_123" },
       ),
     );
-    const error = (await transport(fetch)
+    const error = await transport(fetch)
       .request(get)
-      .catch((e: unknown) => e)) as FusionApiError;
+      .catch((e: unknown) => e);
     expect(error).toMatchObject({
       message: "no_eligible_gateway message",
       details: [{ gateway: "paystack" }],
       hint: "Turn one on",
       docUrl: "https://docs.test/e",
+      requestId: "req_123",
     });
-    const withId = await transport(replyWithId.fetch)
-      .request(get)
-      .catch((e: unknown) => e);
-    expect(withId).toMatchObject({ requestId: "req_123" });
   });
 
   it("turns a non-JSON error (a proxy's HTML 502) into a FusionApiError", async () => {
@@ -124,7 +124,7 @@ describe("errors", () => {
     await expect(transport(fetch).request(get)).rejects.toMatchObject({ statusCode: 302 });
   });
 
-  it("never puts the key in an error", async () => {
+  it("never puts the key in an error, even one fetch wrote it into", async () => {
     const leaky = Object.assign(new TypeError(`fetch failed for Bearer ${TEST_KEY}`), {
       request: { headers: { authorization: `Bearer ${TEST_KEY}` } },
     });
@@ -134,9 +134,8 @@ describe("errors", () => {
       await request(get).catch((e: unknown) => e),
       await request(get).catch((e: unknown) => e),
     ]) {
-      expect(inspect(error, { depth: Infinity, showHidden: true })).not.toContain(
-        `request: { headers`,
-      );
+      expect((error as Error).message).not.toContain(TEST_KEY);
+      expect(inspect(error, { depth: Infinity, showHidden: true })).not.toContain(TEST_KEY);
       expect(JSON.stringify(error)).not.toContain(TEST_KEY);
       expect((error as Error).cause).toBeUndefined();
     }
@@ -155,24 +154,14 @@ describe("retries", () => {
   });
 
   it("waits Retry-After seconds on 429, capped at a minute", async () => {
-    const { fetch } = fakeFetch(
-      apiError(429, "rate_limited", {}),
-      json(
-        429,
-        { error: { code: "rate_limited", message: "m", statusCode: 429 } },
-        { "retry-after": "3" },
-      ),
-      json(
-        429,
-        { error: { code: "rate_limited", message: "m", statusCode: 429 } },
-        { "retry-after": "99999" },
-      ),
-    );
+    const limited = (seconds: string) =>
+      apiError(429, "rate_limited", {}, { "retry-after": seconds });
+    const { fetch } = fakeFetch(limited("3"), limited("99999"), limited("99999"));
     const { request, waits } = transport(fetch);
     const error = await request(get).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(FusionRateLimitError);
     expect(error).toMatchObject({ retryAfter: 99999 });
-    expect(waits[1]).toBe(3_000);
+    expect(waits).toEqual([3_000, 60_000]);
   });
 
   it("retries a create still running under the same Idempotency-Key", async () => {
@@ -180,18 +169,6 @@ describe("retries", () => {
     const { request } = transport(fetch);
     await request({ method: "POST", path: "/v1/payments", body: {}, idempotencyKey: "k1" });
     expect(calls.map((c) => c.headers["idempotency-key"])).toEqual(["k1", "k1"]);
-  });
-
-  it.each([
-    [400, "invalid_request"],
-    [401, "invalid_api_key"],
-    [404, "payment_not_found"],
-    [409, "merchant_reference_taken"],
-    [422, "no_eligible_gateway"],
-  ])("does not retry %i %s", async (status, code) => {
-    const { fetch, calls } = fakeFetch(apiError(status, code));
-    await expect(transport(fetch).request(get)).rejects.toBeInstanceOf(FusionApiError);
-    expect(calls).toHaveLength(1);
   });
 
   it("stops after maxRetries", async () => {
@@ -213,14 +190,19 @@ describe("retries", () => {
     expect(calls).toHaveLength(2);
   });
 
-  it("times out a hung request", async () => {
-    const hung: typeof globalThis.fetch = (_input, init) =>
-      new Promise((_, reject) =>
-        init?.signal?.addEventListener("abort", () =>
-          reject(new DOMException("aborted", "AbortError")),
+  it.each([
+    [
+      "a fetch that honours the signal",
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_, reject) =>
+          init?.signal?.addEventListener("abort", () =>
+            reject(new DOMException("aborted", "AbortError")),
+          ),
         ),
-      );
-    const error = await transport(hung, { timeout: 20, maxRetries: 0 })
+    ],
+    ["a fetch that ignores it", () => new Promise<Response>(() => {})],
+  ])("times out %s", async (_, hung) => {
+    const error = await transport(hung as typeof globalThis.fetch, { timeout: 20, maxRetries: 0 })
       .request(get)
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(FusionConnectionError);
