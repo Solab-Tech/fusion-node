@@ -1,9 +1,10 @@
 # Publishes @usefusion/node to npm when a version tag is pushed (`gh release create v0.1.0
-# --generate-notes`, or `git tag v0.1.0 && git push origin v0.1.0`). Two jobs, so the publish
-# token is never in the environment of the toolchain that builds the package:
+# --target main --generate-notes`). Two jobs, so the publish token is never in the environment
+# of the toolchain that builds the package:
 #
-#   build    no secrets. The tag names the package version and the commit is on staging; then
-#            install (frozen lockfile, no scripts), lint, test, build, smoke, and pack the tarball.
+#   build    no secrets. The tag names the package version and the commit is on main, so the
+#            release PR was merged; then install (frozen lockfile, no scripts), lint, test, build,
+#            smoke, and pack the tarball.
 #   publish  in the `npm` environment, whose reviewer approves the run. Publishes that tarball
 #            with provenance, which ties it to this commit and run on npmjs.com. Scripts stay
 #            off: the tarball is final, nothing else runs with the token.
@@ -36,7 +37,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: The tag names the package version, on a commit staging has
+      - name: The tag names the package version, on a commit main has
         id: version
         run: |
           version="$(node -p "require('./package.json').version")"
@@ -44,9 +45,9 @@ jobs:
             echo "::error::tag $GITHUB_REF_NAME, but package.json is $version"
             exit 1
           fi
-          git fetch --no-tags origin staging
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/staging; then
-            echo "::error::$GITHUB_REF_NAME points at a commit that is not on staging"
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME points at a commit that is not on main"
             exit 1
           fi
           case "$version" in
