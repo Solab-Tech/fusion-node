@@ -16,19 +16,12 @@
     "nigeria"
   ],
   "type": "module",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -37,7 +30,7 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19"
   },
   "publishConfig": {
     "access": "public"
@@ -45,7 +38,7 @@
   "packageManager": "pnpm@10.34.9",
   "scripts": {
     "generate": "pnpm dlx openapi-typescript@7.13.0 spec/checkout-openapi.json -o src/generated/api.ts && prettier --write src/generated/api.ts",
-    "build": "rm -rf dist && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/mark-cjs.mjs",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit && tsc --noEmit -p test && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",

@@ -1,15 +1,8 @@
-// Loads the built CommonJS package and checks it exports the same names as the ESM build.
-const cjs = require("../dist/cjs/index.js");
+// require() of the ESM build, which Node 20.19+ and 22.12+ support. The package's engines field
+// promises it, so a build that breaks it fails here.
+const { Fusion, default: Default, VERSION } = require("../dist/index.js");
 
-(async () => {
-  const esm = await import("../dist/esm/index.js");
-  const names = (m) => Object.keys(m).sort().join(",");
-  if (names(cjs) !== names(esm)) throw new Error(`exports differ: ${names(cjs)} vs ${names(esm)}`);
-  if (cjs.default !== cjs.Fusion) throw new Error("default and named exports differ");
-  const fusion = new cjs.Fusion(`fsk_live_${"0".repeat(40)}`);
-  if (fusion.mode !== "live") throw new Error("mode not read from the key");
-  console.log(`cjs ok: @usefusion/node ${cjs.VERSION}`);
-})().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (Default !== Fusion) throw new Error("default and named exports differ");
+if (new Fusion(`fsk_live_${"0".repeat(40)}`).mode !== "live")
+  throw new Error("mode not read from the key");
+console.log(`require ok: @usefusion/node ${VERSION}`);
