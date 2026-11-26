@@ -39,6 +39,9 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "generate": "openapi-typescript spec/checkout-openapi.json -o src/generated/api.ts && prettier --write src/generated/api.ts",
@@ -46,7 +49,8 @@
     "lint": "tsc --noEmit && tsc --noEmit -p test && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "smoke": "node scripts/smoke.mjs && node scripts/smoke.cjs"
+    "smoke": "node scripts/smoke.mjs && node scripts/smoke.cjs",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm smoke"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
