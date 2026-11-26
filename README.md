@@ -6,7 +6,7 @@ the gateways you already use (Paystack, Flutterwave, Interswitch, Moniepoint) wi
 - Typed requests and responses, generated from the API's own spec
 - Safe retries: every payment create carries an `Idempotency-Key`
 - Errors that say what to do (`code`, `hint`, `docUrl`, `requestId`)
-- Zero dependencies. Node 20+, Bun, Deno, Cloudflare Workers, Vercel Edge. ESM and CommonJS
+- Zero dependencies. Node 20.19+, Bun, Deno, Cloudflare Workers, Vercel Edge
 
 > **Pre-release.** Version 0.x: the API may change between minor versions.
 
@@ -39,11 +39,7 @@ const checked = await fusion.payments.verify(paymentId);
 if (checked.status === "succeeded") fulfil(checked.merchantReference);
 ```
 
-CommonJS:
-
-```js
-const { Fusion } = require("@usefusion/node");
-```
+The package is ESM. From CommonJS, `require("@usefusion/node")` works on Node 20.19+ and 22.12+.
 
 ## Test and live
 
@@ -85,7 +81,7 @@ for await (const event of fusion.events.list({ paymentId: "pay_test_…" })) {
 }
 ```
 
-Verifying incoming webhooks (`fusion.webhooks.verify()`) is coming in 0.2.0.
+Verifying incoming webhooks (`fusion.webhooks.verify()`) is coming next.
 
 ## Errors
 
@@ -120,8 +116,9 @@ try {
 
 Network errors, timeouts, 429, 5xx, and a 409 while the first request under the same
 `Idempotency-Key` is still running are retried (twice by default), waiting `Retry-After` when the
-API sends it and backing off otherwise. A retried create reuses its `Idempotency-Key`, so it
-can never make a second payment.
+API sends it and backing off otherwise. A `Retry-After` past a minute is not waited for: the
+`FusionRateLimitError` is thrown at once with `retryAfter` on it, and your code decides. A retried
+create reuses its `Idempotency-Key`, so it can never make a second payment.
 
 ```ts
 new Fusion(key, {

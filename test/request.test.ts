@@ -153,15 +153,16 @@ describe("retries", () => {
     expect(waits[0]).toBeLessThanOrEqual(500);
   });
 
-  it("waits Retry-After seconds on 429, capped at a minute", async () => {
+  it("waits Retry-After seconds on 429; past a minute, throws at once", async () => {
     const limited = (seconds: string) =>
       apiError(429, "rate_limited", {}, { "retry-after": seconds });
-    const { fetch } = fakeFetch(limited("3"), limited("99999"), limited("99999"));
+    const { fetch, calls } = fakeFetch(limited("3"), limited("61"), limited("1"));
     const { request, waits } = transport(fetch);
     const error = await request(get).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(FusionRateLimitError);
-    expect(error).toMatchObject({ retryAfter: 99999 });
-    expect(waits).toEqual([3_000, 60_000]);
+    expect(error).toMatchObject({ retryAfter: 61 });
+    expect(waits).toEqual([3_000]);
+    expect(calls).toHaveLength(2);
   });
 
   it("retries a create still running under the same Idempotency-Key", async () => {

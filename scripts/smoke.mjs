@@ -1,6 +1,6 @@
 // Loads the built ESM package and makes one request with a fake fetch. Runs on Node, Bun and
 // Deno in CI, so a build that only works on one runtime fails there.
-import Fusion, { Fusion as Named, FusionApiError, VERSION } from "../dist/esm/index.js";
+import Fusion, { Fusion as Named, FusionApiError, VERSION } from "../dist/index.js";
 
 if (Fusion !== Named) throw new Error("default and named exports differ");
 

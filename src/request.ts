@@ -34,16 +34,19 @@ export function idPath(id: unknown): string {
   return id;
 }
 
-/** `Retry-After` is honoured up to a minute; a server cannot park a merchant longer. */
+/**
+ * `Retry-After` is waited for up to a minute. Past that the error is thrown at once, with
+ * `retryAfter` on it.
+ */
 const MAX_RETRY_AFTER_MS = 60_000;
 const BASE_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 8_000;
 
 const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-type RequestError = FusionApiError | FusionConnectionError;
-/** One attempt's outcome. Errors come back, never out: the loop decides whether to retry. */
-type Outcome<T> = { data: T } | { error: RequestError; retryAfterMs?: number | undefined };
+/** A failed attempt. Errors come back, never out: the loop decides whether to retry. */
+type Failure = { error: FusionApiError | FusionConnectionError; retryAfterMs?: number | undefined };
+type Outcome<T> = { data: T } | Failure;
 
 /**
  * The one place a request is made. The secret key lives only in this closure — never on an
@@ -109,7 +112,7 @@ export function createTransport(options: TransportOptions): Transport {
     for (let tries = 0; ; tries++) {
       const outcome = await attempt();
       if ("data" in outcome) return outcome.data;
-      if (tries >= maxRetries || !isRetryable(outcome.error)) throw outcome.error;
+      if (tries >= maxRetries || !isRetryable(outcome)) throw outcome.error;
       await sleep(outcome.retryAfterMs ?? backoff(tries));
     }
   };
@@ -154,16 +157,16 @@ function parse<T>(response: Response, text: string): Outcome<T> {
     requestId,
     retryAfter,
   });
-  return {
-    error,
-    retryAfterMs:
-      retryAfter === undefined ? undefined : Math.min(retryAfter * 1000, MAX_RETRY_AFTER_MS),
-  };
+  return { error, retryAfterMs: retryAfter === undefined ? undefined : retryAfter * 1000 };
 }
 
-/** Network failures, timeouts, 429, 5xx, and a create still running under the same key. */
-function isRetryable(error: RequestError): boolean {
+/**
+ * Network failures, timeouts, 429, 5xx, and a create still running under the same key. Not a 429
+ * that asks for more than a minute: the merchant gets the error and `retryAfter` instead.
+ */
+function isRetryable({ error, retryAfterMs = 0 }: Failure): boolean {
   if (error instanceof FusionConnectionError) return true;
+  if (retryAfterMs > MAX_RETRY_AFTER_MS) return false;
   return (
     error.statusCode === 429 ||
     error.statusCode >= 500 ||
