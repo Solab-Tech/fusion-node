@@ -1,11 +1,17 @@
-# Publishes @usefusion/node to npm when a version tag is pushed (`git tag v0.1.0 &&
-# git push origin v0.1.0`, or `gh release create v0.1.0`). The tag must name the
-# version in package.json. `npm publish` runs prepublishOnly first (lint, test,
-# build, smoke), then signs the tarball with provenance, which ties it to this
-# commit and run on npmjs.com.
+# Publishes @usefusion/node to npm when a version tag is pushed (`gh release create v0.1.0
+# --generate-notes`, or `git tag v0.1.0 && git push origin v0.1.0`). Two jobs, so the publish
+# token is never in the environment of the toolchain that builds the package:
 #
-# Needs one secret, NPM_TOKEN: a granular access token from the npm account that
-# owns the @usefusion scope, with read and write on that scope only.
+#   build    no secrets. The tag names the package version and the commit is on staging; then
+#            install (frozen lockfile, no scripts), lint, test, build, smoke, and pack the tarball.
+#   publish  in the `npm` environment, whose reviewer approves the run. Publishes that tarball
+#            with provenance, which ties it to this commit and run on npmjs.com. Scripts stay
+#            off: the tarball is final, nothing else runs with the token.
+#
+# A prerelease version (0.2.0-beta.1) publishes under the `next` dist-tag, never `latest`.
+#
+# Needs one secret on the `npm` environment, NPM_TOKEN: a granular access token from the npm
+# account that owns the @usefusion scope, with read and write on that scope only.
 name: Release
 
 on:
@@ -14,29 +20,68 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  publish:
-    name: Publish to npm
+  build:
+    name: Check and pack
     runs-on: ubuntu-latest
-    environment: npm
+    outputs:
+      dist-tag: ${{ steps.version.outputs.dist-tag }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://registry.npmjs.org
-      - name: The tag names the package version
+      - name: The tag names the package version, on a commit staging has
+        id: version
         run: |
-          version="v$(node -p "require('./package.json').version")"
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "::error::tag $GITHUB_REF_NAME, but package.json is $version"
             exit 1
           fi
-      - run: pnpm install --frozen-lockfile
-      - run: npm publish --provenance
+          git fetch --no-tags origin staging
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/staging; then
+            echo "::error::$GITHUB_REF_NAME points at a commit that is not on staging"
+            exit 1
+          fi
+          case "$version" in
+            *-*) echo "dist-tag=next" >> "$GITHUB_OUTPUT" ;;
+            *) echo "dist-tag=latest" >> "$GITHUB_OUTPUT" ;;
+          esac
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm smoke
+      - run: npm pack --ignore-scripts
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tarball
+          path: "*.tgz"
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: tarball
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm publish ./*.tgz --provenance --ignore-scripts --tag "$DIST_TAG"
         env:
+          DIST_TAG: ${{ needs.build.outputs.dist-tag }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

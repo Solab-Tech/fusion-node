@@ -1,0 +1,17 @@
+# Dependency upgrades arrive as PRs to read, never as a fresh install on a laptop. Each ecosystem
+# waits seven days after a release before proposing it, the same floor pnpm applies
+# (pnpm-workspace.yaml): the recent npm worm campaigns were pulled within days.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
