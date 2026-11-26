@@ -1,0 +1,88 @@
+# Publishes @usefusion/node to npm when a version tag is pushed (`gh release create v0.1.0
+# --target main --generate-notes`). Two jobs, so the publish token is never in the environment
+# of the toolchain that builds the package:
+#
+#   build    no secrets. The tag names the package version and the commit is on main, so the
+#            release PR was merged; then install (frozen lockfile, no scripts), lint, test, build,
+#            smoke, and pack the tarball.
+#   publish  in the `npm` environment, whose reviewer approves the run. Publishes that tarball
+#            with provenance, which ties it to this commit and run on npmjs.com. Scripts stay
+#            off: the tarball is final, nothing else runs with the token.
+#
+# A prerelease version (0.2.0-beta.1) publishes under the `next` dist-tag, never `latest`.
+#
+# Needs one secret on the `npm` environment, NPM_TOKEN: a granular access token from the npm
+# account that owns the @usefusion scope, with read and write on that scope only.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Check and pack
+    runs-on: ubuntu-latest
+    outputs:
+      dist-tag: ${{ steps.version.outputs.dist-tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: The tag names the package version, on a commit main has
+        id: version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME, but package.json is $version"
+            exit 1
+          fi
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME points at a commit that is not on main"
+            exit 1
+          fi
+          case "$version" in
+            *-*) echo "dist-tag=next" >> "$GITHUB_OUTPUT" ;;
+            *) echo "dist-tag=latest" >> "$GITHUB_OUTPUT" ;;
+          esac
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm smoke
+      - run: npm pack --ignore-scripts
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tarball
+          path: "*.tgz"
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tarball
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm publish ./*.tgz --provenance --ignore-scripts --tag "$DIST_TAG"
+        env:
+          DIST_TAG: ${{ needs.build.outputs.dist-tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

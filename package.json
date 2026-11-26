@@ -1,0 +1,54 @@
+{
+  "name": "@usefusion/node",
+  "version": "0.1.0",
+  "description": "The official Node SDK for the Fusion Checkout API.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Solab-Tech/fusion-node.git"
+  },
+  "keywords": [
+    "fusion",
+    "payments",
+    "checkout",
+    "paystack",
+    "flutterwave",
+    "nigeria"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "scripts": {
+    "generate": "pnpm dlx openapi-typescript@7.13.0 spec/checkout-openapi.json -o src/generated/api.ts && prettier --write src/generated/api.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "lint": "tsc --noEmit && tsc --noEmit -p test && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.mjs && node scripts/smoke.cjs",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm smoke"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "prettier": "^3.10.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

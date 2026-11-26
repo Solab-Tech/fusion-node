@@ -1,0 +1,4 @@
+# Not a workspace: pnpm reads its settings from here. A version published less than seven days
+# ago is not installed; the npm worm campaigns of 2025 were pulled within days of publishing.
+# Applies when the lockfile changes (pnpm add/update, Dependabot), not to a frozen install.
+minimumReleaseAge: 10080
